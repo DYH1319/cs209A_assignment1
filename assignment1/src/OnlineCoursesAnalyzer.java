@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,24 +7,38 @@ import java.util.stream.Collectors;
 public class OnlineCoursesAnalyzer {
     
     List<OnlineCourse> courses;
-
-    public OnlineCoursesAnalyzer(String datasetPath) throws IOException {
-        courses = Files.lines(Paths.get(datasetPath), StandardCharsets.UTF_8)
-                .skip(1)
-                .map(l -> l.split(",(?=\\S)"))
-                .map(a -> new OnlineCourse(a[0], a[1], a[2].substring(6) + "/" + a[2].substring(0, 5), a[3].replace("\"", ""), a[4].replace("\"", ""), a[5].replace("\"", ""), Integer.parseInt(a[6]), Integer.parseInt(a[7]), Integer.parseInt(a[8]), Integer.parseInt(a[9]), Integer.parseInt(a[10]), Double.parseDouble(a[11]), Double.parseDouble(a[12]), Double.parseDouble(a[13]), Double.parseDouble(a[14]), Double.parseDouble(a[15]), Double.parseDouble(a[16]), Double.parseDouble(a[17]), Double.parseDouble(a[18]), Double.parseDouble(a[19]), Double.parseDouble(a[20]), Double.parseDouble(a[21]), Double.parseDouble(a[22])))
-                .toList();
+    
+    public OnlineCoursesAnalyzer(String datasetPath) {
+        try {
+            courses = Files.lines(Paths.get(datasetPath), StandardCharsets.UTF_8)
+                    .skip(1)
+                    .map(l -> l.split(",(?=\\S)"))
+                    .map(a -> new OnlineCourse(a[0], a[1],
+                            a[2].substring(6) + "/" + a[2].substring(0, 5),
+                            a[3].replace("\"", ""), a[4].replace("\"", ""),
+                            a[5].replace("\"", ""), Integer.parseInt(a[6]), Integer.parseInt(a[7]),
+                            Integer.parseInt(a[8]), Integer.parseInt(a[9]), Integer.parseInt(a[10]),
+                            Double.parseDouble(a[11]), Double.parseDouble(a[12]), Double.parseDouble(a[13]),
+                            Double.parseDouble(a[14]), Double.parseDouble(a[15]), Double.parseDouble(a[16]),
+                            Double.parseDouble(a[17]), Double.parseDouble(a[18]), Double.parseDouble(a[19]),
+                            Double.parseDouble(a[20]), Double.parseDouble(a[21]), Double.parseDouble(a[22])))
+                    .toList();
+        } catch (Exception ignore) {
+        
+        }
     }
     
     public Map<String, Integer> getPtcpCountByInst() {
         return courses.stream()
                 .sorted(((o1, o2) -> Objects.compare(o2.getInstitution(), o1.getInstitution(), String::compareTo)))
-                .collect(Collectors.groupingBy(OnlineCourse::getInstitution, Collectors.summingInt(OnlineCourse::getParticipants)));
+                .collect(Collectors.groupingBy(OnlineCourse::getInstitution,
+                        Collectors.summingInt(OnlineCourse::getParticipants)));
     }
     
     public Map<String, Integer> getPtcpCountByInstAndSubject() {
         return courses.stream()
-                .collect(Collectors.groupingBy(e -> e.getInstitution() + "-" + e.getCourseSubject(), Collectors.summingInt(OnlineCourse::getParticipants)))
+                .collect(Collectors.groupingBy(e -> e.getInstitution() + "-" + e.getCourseSubject(),
+                        Collectors.summingInt(OnlineCourse::getParticipants)))
                 .entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed()
                         .thenComparing(Map.Entry.comparingByKey()))
@@ -62,7 +75,7 @@ public class OnlineCoursesAnalyzer {
                 }
             }
         }
-    
+        
         Map<String, List<List<String>>> result2 = new HashMap<>();
         result.forEach((k, v) -> {
             result2.put(k, new ArrayList<>());
@@ -76,7 +89,7 @@ public class OnlineCoursesAnalyzer {
             v.get(0).sort(String::compareTo);
             v.get(1).sort(String::compareTo);
         });
-    
+        
         return result2;
     }
     
@@ -116,30 +129,57 @@ public class OnlineCoursesAnalyzer {
         Map<String, Double> averageMedianAge = courses.stream()
                 .collect(Collectors.groupingBy(OnlineCourse::getCourseNumber))
                 .entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().mapToDouble(OnlineCourse::getMedianAge).average().orElseThrow()));
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .mapToDouble(OnlineCourse::getMedianAge)
+                                .average()
+                                .orElseThrow()));
         Map<String, Double> average_male = courses.stream()
                 .collect(Collectors.groupingBy(OnlineCourse::getCourseNumber))
                 .entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().mapToDouble(OnlineCourse::get_male).average().orElseThrow()));
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .mapToDouble(OnlineCourse::get_male)
+                                .average()
+                                .orElseThrow()));
         Map<String, Double> average_bachelor_sDegreeOrHigher = courses.stream()
                 .collect(Collectors.groupingBy(OnlineCourse::getCourseNumber))
                 .entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().mapToDouble(OnlineCourse::get_bachelor_sDegreeOrHigher).average().orElseThrow()));
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .mapToDouble(OnlineCourse::get_bachelor_sDegreeOrHigher)
+                                .average()
+                                .orElseThrow()));
         Map<String, String> courseNumber_courseTitle = courses.stream()
                 .collect(Collectors.groupingBy(OnlineCourse::getCourseNumber))
                 .entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().sorted(Comparator.comparing(OnlineCourse::getLaunchDate).reversed()).map(OnlineCourse::getCourseTitle).findFirst().orElseThrow()));
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .sorted(Comparator.comparing(OnlineCourse::getLaunchDate).reversed())
+                                .map(OnlineCourse::getCourseTitle)
+                                .findFirst()
+                                .orElseThrow()));
         Map<String, Double> similarityValue = new LinkedHashMap<>();
-        averageMedianAge.forEach((k, v) -> similarityValue.put(k, Math.pow(age - v, 2) + Math.pow(gender * 100 - average_male.get(k), 2) + Math.pow(isBachelorOrHigher * 100 - average_bachelor_sDegreeOrHigher.get(k), 2)));
+        averageMedianAge.forEach((k, v) ->
+                similarityValue.put(k, Math.pow(age - v, 2) +
+                                       Math.pow(gender * 100 - average_male.get(k), 2) +
+                                       Math.pow(isBachelorOrHigher * 100 - average_bachelor_sDegreeOrHigher.get(k), 2)));
         
-        similarityValue.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(e -> System.out.println(e.getKey() + "==" + e.getValue()));
+        similarityValue.entrySet().stream().sorted(Map.Entry.comparingByValue())
+                .forEach(e -> System.out.println(e.getKey() + "==" + e.getValue()));
         
         Map<String, Double> similarityValue2 = new HashMap<>();
         similarityValue.forEach((k, v) -> similarityValue2.put(courseNumber_courseTitle.get(k), v));
         
-        return similarityValue2.entrySet().stream().sorted(Map.Entry.<String, Double>comparingByValue().thenComparing(Map.Entry.comparingByKey())).limit(10).map(Map.Entry::getKey).collect(Collectors.toList());
+        return similarityValue2.entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue()
+                        .thenComparing(Map.Entry.comparingByKey()))
+                .limit(10)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 }
+
 class OnlineCourse {
     public String institution;
     public String courseNumber;
